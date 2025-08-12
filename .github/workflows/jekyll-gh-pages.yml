@@ -49,3 +49,491 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Procedimentos de OPMEs disponíveis no SIGTAP/SUS</title>
+    <!-- Inclui o Tailwind CSS para estilização -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a fonte Times New Roman e tamanho 12px como padrão para uma melhor legibilidade */
+        body {
+            font-family: 'Times New Roman', serif; /* Altera para Times New Roman */
+            font-size: 12px; /* Define o tamanho da fonte para 12px */
+            background-color: #a7b2eb; /* Fundo azul claro */
+            line-height: 1.6; /* Melhorar a legibilidade do texto */
+        }
+        /* Estilos adicionais para a tabela */
+        th, td {
+            padding: 0.75rem 1.5rem; /* Aumenta o preenchimento para células da tabela */
+            text-align: left; /* Alinhamento do texto à esquerda */
+            border-bottom: 1px solid #e5e7eb; /* Borda inferior para cada linha */
+        }
+        th {
+            background-color: #e0e7ff; /* Cor de fundo para o cabeçalho da tabela (azul claro) */
+            color: #312e81; /* Cor do texto para o cabeçado (azul escuro) */
+            font-weight: 600; /* Negrito semipesado */
+            text-transform: uppercase; /* Transforma o texto do cabeçalho em maiúsculas */
+            letter-spacing: 0.05em; /* Espaçamento entre letras */
+            cursor: pointer; /* Indica que o cabeçalho é clicável */
+        }
+        th:hover {
+             background-color: #c3dafe; /* Cor de fundo ao passar o mouse no cabeçalho */
+        }
+        tr:hover {
+            background-color: #f3f4f6; /* Cor de fundo ao passar o mouse na linha */
+        }
+        /* Adiciona bordas arredondadas à tabela */
+        table {
+            border-collapse: collapse; /* Remove o espaçamento entre as bordas das células */
+            width: 100%; /* Garante que a tabela ocupe a largura total do contêiner */
+            border-radius: 0.5rem; /* Adiciona bordas arredondadas */
+            overflow: hidden; /* Garante que as bordas arredondadas sejam visíveis */
+        }
+        /* Estilo para a célula da primeira coluna (CATEGORIA) para melhor visualização */
+        td:first-child {
+            font-weight: 500; /* Texto semi-negrito para a categoria */
+            color: #4b5563; /* Cor de texto cinza escuro */
+        }
+        /* Estilo para a célula da segunda coluna (PROCEDIMENTO) */
+         td:nth-child(2) {
+            font-family: monospace; /* Fonte monoespaçada para o código do procedimento */
+            color: #1f2937; /* Cor de texto mais escura */
+        }
+        /* Estilo para a célula da coluna CIDS */
+        td:last-child {
+            font-size: 0.875rem; /* Tamanho de fonte menor para os CIDS */
+            color: #6b7280; /* Cor de texto cinza */
+        }
+         /* Estilo para o input de pesquisa geral */
+        #search-input {
+            padding: 0.75rem 1rem; /* Ajusta o padding */
+            border: 1px solid #d1d5db; /* Cor da borda */
+            border-radius: 0.5rem; /* Bordas arredondadas */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Sombra leve */
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; /* Transição suave */
+        }
+        #search-input:focus {
+            border-color: #3b82f6; /* Cor da borda ao focar */
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Sombra ao focar */
+            outline: none; /* Remove o outline padrão */
+        }
+         /* Estilos para inputs de filtro por coluna */
+        .column-filter-input {
+            width: 100%; /* Ocupa a largura total da coluna */
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            font-size: 0.875rem; /* Tamanho de fonte menor */
+             box-shadow: inset 0 1px 2px rgba(0,0,0,0.075); /* Sombra interna */
+        }
+        .column-filter-input:focus {
+            border-color: #3b82f6;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.075), 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
+            outline: none;
+        }
+
+        /* Estilos para os botões de paginação */
+        .pagination button {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.25rem;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .pagination button:hover:not(:disabled) {
+            background-color: #f3f4f6;
+        }
+         .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .pagination .page-number {
+             padding: 0.5rem 0.75rem;
+             margin: 0 0.25rem;
+             border: 1px solid #d1d5db;
+             border-radius: 0.25rem;
+             background-color: #ffffff;
+             cursor: pointer;
+             transition: background-color 0.2s ease-in-out;
+           }
+           .pagination .page-number.active {
+             background-color: #3b82f6;
+             color: white;
+             border-color: #3b82f6;
+           }
+           /* Estilos para o contêiner do cabeçalho com logo e título */
+           .header-container {
+                display: flex;
+                align-items: center; /* Alinha verticalmente a logo e o texto */
+                justify-content: center; /* Centraliza o conteúdo horizontalmente */
+                margin-bottom: 1.5rem; /* Adiciona algum espaço abaixo do cabeçalho */
+           }
+           .logo {
+             height: 4rem; /* Tamanho ajustado da logo */
+             margin-right: 1rem; /* Espaço entre a logo e o título */
+             /* Remove as propriedades de centralização anteriores */
+             display: inline-block;
+             margin-left: 0;
+             margin-right: 0;
+           }
+           .header-title {
+               text-align: left; /* Garante que o título esteja alinhado à esquerda dentro do flex item */
+               margin: 0; /* Remove margens padrão do h1 para melhor controle no flexbox */
+           }
+           .footer-text {
+                font-size: 10px; /* Tamanho da fonte para o rodapé */
+                text-align: left; /* Alinhamento do texto à esquerda */
+                margin-top: 2rem; /* Espaço superior para separar do conteúdo acima */
+                color: #4b5563; /* Cor de texto cinza escuro para o rodapé */
+           }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-8">
+    <div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+        <!-- Contêiner para a Logo e o Título -->
+        <div class="header-container">
+            <!-- Logo atualizada com o caminho da imagem carregada -->
+            <img src="/content/CAMISA OFORT.png" alt="Logo da Oficina Ortopédica da Paraíba" class="logo">
+            <h1 class="text-3xl font-bold text-gray-800 header-title">Procedimentos de OPMEs disponíveis na Oficina Ortopédica da Paraíba</h1>
+        </div>
+
+        <!-- Seção de Filtros e Pesquisa Geral -->
+        <div class="mb-6">
+            <input
+                type="text"
+                id="search-input"
+                placeholder="Pesquisa geral por procedimento, descrição, CIDs..."
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+            >
+        </div>
+
+         <!-- Seção de Filtros por Coluna -->
+         <div class="mb-6">
+             <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+                 <input type="text" class="column-filter-input" data-col="CATEGORIA" placeholder="Filtrar Categoria">
+                 <input type="text" class="column-filter-input" data-col="PROCEDIMENTO" placeholder="Filtrar Procedimento">
+                 <input type="text" class="column-filter-input" data-col="CIDS" placeholder="Filtrar CIDs">
+             </div>
+         </div>
+
+
+        <!-- Tabela para exibir os dados -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-col="CATEGORIA">CATEGORIA</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-col="PROCEDIMENTO">PROCEDIMENTO</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-col="DESCRIÇÃO">DESCRIÇÃO</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-col="IDADE MÍNIMA">IDADE MÍNIMA</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-col="IDADE MÁXIMA">IDADE MÁXIMA</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-col="QUANTIDADE MÁXIMA">QUANTIDADE MÁXIMA</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-col="CIDS">CIDS</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
+                    <!-- Data rows will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+         <!-- Controles de Paginação -->
+        <div id="pagination-controls" class="pagination mt-6 flex justify-center items-center">
+            <!-- Pagination buttons will be added here by JavaScript -->
+        </div>
+        <!-- Footer -->
+        <div class="footer-text">
+            Criado por: Maria Eduarda Camilo Damião (Atualização 08/2025)
+        </div>
+    </div>
+
+    <script>
+        // Define a variável global 'json_data' com o conteúdo JSON fornecido
+        // Os termos 'Não se Aplica' foram substituídos por 'NÃO SE APLICA'
+        const json_data = `[]`; // Os dados JSON foram removidos
+
+        let data = null; // Variável para armazenar os dados JSON carregados
+        let filteredData = null; // Variável para armazenar os dados filtrados (após pesquisa geral e filtros de coluna)
+        let currentPage = 1;
+        const rowsPerPage = 20; // Número de linhas por página
+        let currentSortColumn = 'CATEGORIA'; // Coluna de ordenação inicial definida como 'CATEGORIA'
+        let currentSortOrder = 'asc'; // Ordem de ordenação inicial definida como ascendente
+        const columnFilters = {}; // Objeto para armazenar os valores dos filtros de coluna atuais
+
+        // Função para exibir dados na tabela (apenas os dados da página atual)
+        function displayData(dataToDisplay) {
+            const tableBody = document.getElementById('data-table-body');
+            tableBody.innerHTML = ''; // Limpa as linhas existentes
+
+            if (!dataToDisplay || dataToDisplay.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Nenhum dado encontrado.</td></tr>';
+                return;
+            }
+
+            dataToDisplay.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap">${item.CATEGORIA || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${item.PROCEDIMENTO || ''}</td>
+                    <td class="px-6 py-4">${item.DESCRIÇÃO || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${item['IDADE MÍNIMA'] || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${item['IDADE MÁXIMA'] || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">${item['QUANTIDADE MÁXIMA'] || ''}</td>
+                    <td class="px-6 py-4">${item.CIDS || ''}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Função para atualizar o estado desabilitado dos botões de paginação
+        function updatePaginationButtonStates(totalPages) {
+            const prevButton = document.querySelector('.pagination button:first-child');
+            const nextButton = document.querySelector('.pagination button:last-child');
+            const pageButtons = document.querySelectorAll('.pagination .page-number');
+
+            if (prevButton) prevButton.disabled = currentPage === 1;
+            if (nextButton) nextButton.disabled = currentPage === totalPages;
+
+            pageButtons.forEach(button => {
+                button.classList.remove('active');
+                if (parseInt(button.textContent) === currentPage) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        // Função para configurar os controles de paginação
+        function setupPagination(dataArray) {
+            const paginationControls = document.getElementById('pagination-controls');
+            paginationControls.innerHTML = ''; // Limpa os controles existentes
+
+            const totalPages = Math.ceil(dataArray.length / rowsPerPage);
+
+            if (totalPages <= 1) {
+                return; // Nenhuma paginação necessária se houver apenas uma página
+            }
+
+            // Botão Anterior
+            const prevButton = document.createElement('button');
+            prevButton.textContent = 'Anterior';
+            prevButton.disabled = currentPage === 1;
+            prevButton.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderPage(dataArray);
+                }
+            });
+            paginationControls.appendChild(prevButton);
+
+            // Números das páginas
+            // Exibe um número limitado de botões de página em torno da página atual
+            const maxPageButtons = 5; // Número de botões de página a serem exibidos
+            let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+            // Ajusta o início e o fim se estiver perto dos limites
+            if (endPage - startPage + 1 < maxPageButtons) {
+                startPage = Math.max(1, endPage - maxPageButtons + 1);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageButton = document.createElement('button');
+                pageButton.textContent = i;
+                pageButton.classList.add('page-number');
+                if (i === currentPage) {
+                    pageButton.classList.add('active');
+                }
+                pageButton.addEventListener('click', () => {
+                    currentPage = i;
+                    renderPage(dataArray);
+                });
+                paginationControls.appendChild(pageButton);
+            }
+
+            // Botão Próximo
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Próxima';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderPage(dataArray);
+                }
+            });
+            paginationControls.appendChild(nextButton);
+
+            // Atualiza o estado dos botões após renderizar os números das páginas
+            updatePaginationButtonStates(totalPages);
+        }
+
+        // Função para renderizar a página atual
+        function renderPage(dataArray) {
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const paginatedData = dataArray.slice(start, end);
+            displayData(paginatedData);
+            setupPagination(dataArray); // Reconfigura a paginação para atualizar o estado do botão ativo e a visibilidade
+        }
+
+
+        // Função para ordenar dados
+        function sortData(dataArray, column, order) {
+            dataArray.sort((a, b) => {
+                const valA = a[column];
+                const valB = b[column];
+
+                // Lida com valores nulos/indefinidos tratando-os como strings vazias para ordenação
+                const strA = (valA === null || valA === undefined) ? '' : String(valA);
+                const strB = (valB === null || valB === undefined) ? '' : String(valB);
+
+                // Tenta comparação numérica primeiro para colunas potencialmente numéricas
+                const numA = parseFloat(strA.replace(',', '.')); // Lida com separador decimal de vírgula
+                const numB = parseFloat(strB.replace(',', '.'));
+
+                let comparison = 0;
+                if (!isNaN(numA) && !isNaN(numB)) {
+                    // Comparação numérica
+                    if (numA < numB) {
+                        comparison = -1;
+                    } else if (numA > numB) {
+                        comparison = 1;
+                    }
+                } else {
+                    // Comparação de strings para todos os outros casos
+                    comparison = strA.localeCompare(strB, 'pt-BR', { sensitivity: 'base' }); // Ignora maiúsculas/minúsculas, ignora acentos
+                }
+
+
+                if (order === 'desc') {
+                    return comparison * -1; // Inverte a ordem para descendente
+                }
+                return comparison; // Ordem ascendente
+            });
+        }
+
+        // Função para aplicar todos os filtros e ordenação ativos
+        function applyFiltersAndSort() {
+            if (!data) {
+                console.warn("Dados ainda não carregados.");
+                return;
+            }
+
+            let currentFilteredData = [...data]; // Começa com uma cópia dos dados originais
+
+            // Aplica filtros de coluna
+            const columnFilterKeys = Object.keys(columnFilters);
+            if (columnFilterKeys.length > 0) {
+                currentFilteredData = currentFilteredData.filter(item => {
+                    let match = true;
+                    for (const col of columnFilterKeys) {
+                        const filterTerm = columnFilters[col].toLowerCase();
+                        if (filterTerm) {
+                            const itemValue = item[col] ? String(item[col]).toLowerCase() : '';
+                            if (!itemValue.includes(filterTerm)) {
+                                match = false;
+                                break;
+                            }
+                        }
+                    }
+                    return match;
+                });
+            }
+
+            // Aplica filtro de pesquisa geral aos dados já filtrados por coluna
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            if (searchTerm) {
+                currentFilteredData = currentFilteredData.filter(item => {
+                    const categoria = item.CATEGORIA ? String(item.CATEGORIA).toLowerCase() : '';
+                    const procedimento = item.PROCEDIMENTO ? String(item.PROCEDIMENTO).toLowerCase() : '';
+                    const descricao = item.DESCRIÇÃO ? String(item.DESCRIÇÃO).toLowerCase() : '';
+                    const cids = item.CIDS ? String(item.CIDS).toLowerCase() : '';
+
+                    return (
+                        categoria.includes(searchTerm) ||
+                        procedimento.includes(searchTerm) ||
+                        descricao.includes(searchTerm) ||
+                        cids.includes(searchTerm)
+                    );
+                });
+            }
+
+
+            filteredData = currentFilteredData; // Atualiza a variável global filteredData
+
+            // Aplica a ordenação atual após a filtragem
+            if (currentSortColumn) {
+                sortData(filteredData, currentSortColumn, currentSortOrder);
+            }
+
+            // Redefine a paginação e renderiza
+            currentPage = 1;
+            setupPagination(filteredData);
+            renderPage(filteredData);
+        }
+
+
+        // Função para adicionar listeners de evento aos cabeçalhos da tabela para ordenação
+        function addSortListeners() {
+            const headers = document.querySelectorAll('th[data-col]');
+            headers.forEach(header => {
+                const column = header.getAttribute('data-col');
+                header.addEventListener('click', () => {
+                    if (currentSortColumn === column) {
+                        // Se a mesma coluna, alterna a ordem de ordenação
+                        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        // Se for uma coluna diferente, o padrão é ascendente
+                        currentSortColumn = column;
+                        currentSortOrder = 'asc';
+                    }
+
+                    // Aplica filtros e depois ordena
+                    applyFiltersAndSort();
+                });
+            });
+        }
+
+        // Função para adicionar listeners de evento aos inputs de filtro de coluna
+        function addColumnFilterListeners() {
+            const filterInputs = document.querySelectorAll('.column-filter-input');
+            filterInputs.forEach(input => {
+                const column = input.getAttribute('data-col');
+                if (column) {
+                    input.addEventListener('input', () => {
+                        columnFilters[column] = input.value; // Armazena o valor do filtro
+                        applyFiltersAndSort(); // Reaplica todos os filtros e ordenação
+                    });
+                }
+            });
+        }
+
+
+        // Listener de evento para o input de pesquisa geral
+        document.getElementById('search-input').addEventListener('input', applyFiltersAndSort);
+
+        // Função para carregar dados JSON
+        async function loadData() {
+            try {
+                // Analisa a string global json_data em um objeto JavaScript
+                data = JSON.parse(json_data);
+                console.log("Dados carregados:", data); // Linha de depuração
+                addSortListeners(); // Adiciona listeners de ordenação após o carregamento dos dados e a existência dos cabeçalhos
+                addColumnFilterListeners(); // Adiciona listeners de filtro de coluna
+                applyFiltersAndSort(); // Aplica filtros e ordenação iniciais
+            } catch (error) {
+                console.error("Erro ao carregar ou analisar dados:", error);
+            }
+        }
+
+        // Carrega os dados quando a página é carregada - envolvido em DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', (event) => {
+            loadData();
+        });
+
+    </script>
+</body>
+</html>
