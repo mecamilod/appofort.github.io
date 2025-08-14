@@ -468,7 +468,7 @@
         async function loadData() {
             try {
                 // Analisa a string global json_data em um objeto JavaScript
-                data = JSON.parse(json_data);
+                data = PROCAGO25.parse(json_data);
                 console.log("Dados carregados:", data); // Linha de depuração
                 addSortListeners(); // Adiciona listeners de ordenação após o carregamento dos dados e a existência dos cabeçalhos
                 addColumnFilterListeners(); // Adiciona listeners de filtro de coluna
