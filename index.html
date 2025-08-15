@@ -63,11 +63,10 @@
                     <tr>
                         <th data-col="CATEGORIA">CATEGORIA</th>
                         <th data-col="PROCEDIMENTO">PROCEDIMENTO</th>
-                        <th data-col="DESCRIÇÃO">DESCRIÇÃO</th>
                         <th data-col="IDADE MÍNIMA">IDADE MÍNIMA</th>
                         <th data-col="IDADE MÁXIMA">IDADE MÁXIMA</th>
                         <th data-col="QUANTIDADE MÁXIMA">QUANTIDADE MÁXIMA</th>
-                        <th data-col="CIDS">CIDs</th>
+                        <th data-col="CIDs">CIDs</th>
                     </tr>
                 </thead>
                 <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
@@ -98,7 +97,6 @@
                 row.innerHTML = `
                     <td>${item.CATEGORIA || ''}</td>
                     <td>${item.PROCEDIMENTO || ''}</td>
-                    <td>${item.DESCRIÇÃO || ''}</td>
                     <td>${item['IDADE MÍNIMA'] || ''}</td>
                     <td>${item['IDADE MÁXIMA'] || ''}</td>
                     <td>${item['QUANTIDADE MÁXIMA'] || ''}</td>
@@ -167,7 +165,7 @@
             const search = document.getElementById('search-input').value.toLowerCase();
             if (search) {
                 arr = arr.filter(item =>
-                    ['CATEGORIA','PROCEDIMENTO','DESCRIÇÃO','CIDS']
+                    ['CATEGORIA','PROCEDIMENTO','CIDs']
                         .some(col => (item[col] || '').toString().toLowerCase().includes(search))
                 );
             }
@@ -202,7 +200,7 @@
         });
 
         // Carrega dados do JSON externo
-        async function loadData() {
+        async function loadData(dados.json) {
             try {
                 const response = await fetch('dados.json');
                 if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON: ' + response.statusText);
