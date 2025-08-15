@@ -7,9 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            background-color: #f9fafb;
+            font-family: 'Times New Roman', serif;
+            font-size: 12px;
+            background-color: #a7b2eb;
             line-height: 1.6;
         }
         th, td { padding: 0.75rem 1.5rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
@@ -41,27 +41,6 @@
             .footer-text { font-size: 9px;}
         }
         .table-responsive { overflow-x: auto; }
-        .sort-icon { font-size: 0.8em; margin-left: 0.5em; vertical-align: middle; }
-
-        /* Estilos para a funcionalidade de "Ver mais..." */
-        .cid-list {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: inline;
-        }
-        .cid-item {
-            display: inline;
-            white-space: nowrap;
-        }
-        .cid-toggle {
-            cursor: pointer;
-            color: #3b82f6;
-            text-decoration: none;
-            font-size: 0.8em;
-            margin-left: 0.5rem;
-            display: inline-block;
-        }
     </style>
 </head>
 <body class="p-2 sm:p-6 lg:p-8">
@@ -74,8 +53,8 @@
             <input
                 type="text"
                 id="search-input"
-                placeholder="🔍 Pesquisa geral por procedimento, categoria, CIDs..."
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm placeholder-gray-400"
+                placeholder="Pesquisa geral por procedimento, categoria, CIDs..."
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
             >
         </div>
         <div class="mb-4">
@@ -89,16 +68,17 @@
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
-                        <th scope="col" data-col="CATEGORIA">CATEGORIA <span class="sort-icon"></span></th>
-                        <th scope="col" data-col="PROCEDIMENTO">PROCEDIMENTO <span class="sort-icon"></span></th>
-                        <th scope="col" data-col="IDADE MÍNIMA">IDADE MÍNIMA <span class="sort-icon"></span></th>
-                        <th scope="col" data-col="IDADE MÁXIMA">IDADE MÁXIMA <span class="sort-icon"></span></th>
-                        <th scope="col" data-col="QUANTIDADE MÁXIMA">QUANTIDADE MÁXIMA <span class="sort-icon"></span></th>
-                        <th scope="col" data-col="CIDS">CIDs <span class="sort-icon"></span></th>
+                        <th scope="col" data-col="CATEGORIA">CATEGORIA</th>
+                        <th scope="col" data-col="PROCEDIMENTO">PROCEDIMENTO</th>
+                        <th scope="col" data-col="IDADE MÍNIMA">IDADE MÍNIMA</th>
+                        <th scope="col" data-col="IDADE MÁXIMA">IDADE MÁXIMA</th>
+                        <th scope="col" data-col="QUANTIDADE MÁXIMA">QUANTIDADE MÁXIMA</th>
+                        <th scope="col" data-col="CIDS">CIDs</th>
                     </tr>
                 </thead>
                 <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
-                    </tbody>
+                    <!-- Dados inseridos via JS -->
+                </tbody>
             </table>
         </div>
         <div id="pagination-controls" class="pagination mt-6 flex justify-center items-center"></div>
@@ -111,6 +91,7 @@
         let currentPage = 1, currentSortColumn = 'CATEGORIA', currentSortOrder = 'asc';
         const rowsPerPage = 20, columnFilters = {};
 
+        // Cria linhas da tabela
         function displayData(arr) {
             const tbody = document.getElementById('data-table-body');
             tbody.innerHTML = '';
@@ -120,61 +101,19 @@
             }
             arr.forEach(item => {
                 const row = document.createElement('tr');
-                const cidsContent = item.CIDS || '';
-                const cidsArray = cidsContent.split(',').map(cid => cid.trim()).filter(cid => cid);
-                
-                let cidsHTML = '';
-                const displayCount = 5;
-
-                if (cidsArray.length > displayCount) {
-                    const visibleCids = cidsArray.slice(0, displayCount);
-                    const hiddenCids = cidsArray.slice(displayCount);
-                    
-                    cidsHTML = `
-                        <ul class="cid-list">
-                            ${visibleCids.map(cid => `<li class="cid-item">${cid}, </li>`).join('')}
-                        </ul>
-                        <span class="hidden-cids" style="display:none;">
-                            <ul class="cid-list">
-                                ${hiddenCids.map(cid => `<li class="cid-item">${cid}, </li>`).join('')}
-                            </ul>
-                        </span>
-                        <a href="#" class="cid-toggle" data-state="collapsed">[+] Ver mais</a>
-                    `;
-                } else {
-                    cidsHTML = `<ul class="cid-list">${cidsArray.map(cid => `<li class="cid-item">${cid}, </li>`).join('')}</ul>`;
-                }
-
                 row.innerHTML = `
                     <td>${item.CATEGORIA || ''}</td>
                     <td>${item.PROCEDIMENTO || ''}</td>
                     <td>${item['IDADE MÍNIMA'] || ''}</td>
                     <td>${item['IDADE MÁXIMA'] || ''}</td>
                     <td>${item['QUANTIDADE MÁXIMA'] || ''}</td>
-                    <td>${cidsHTML}</td>
+                    <td>${item.CIDS || ''}</td>
                 `;
                 tbody.appendChild(row);
             });
-            
-            // Adiciona o listener para expandir/recolher
-            document.querySelectorAll('.cid-toggle').forEach(toggle => {
-                toggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const hiddenCids = toggle.previousElementSibling;
-                    
-                    if (toggle.dataset.state === 'collapsed') {
-                        hiddenCids.style.display = 'inline';
-                        toggle.textContent = '[-] Ver menos';
-                        toggle.dataset.state = 'expanded';
-                    } else {
-                        hiddenCids.style.display = 'none';
-                        toggle.textContent = '[+] Ver mais';
-                        toggle.dataset.state = 'collapsed';
-                    }
-                });
-            });
         }
 
+        // Paginação
         function setupPagination(arr) {
             const controls = document.getElementById('pagination-controls');
             controls.innerHTML = '';
@@ -195,4 +134,93 @@
                 const btn = document.createElement('button');
                 btn.textContent = i;
                 btn.className = 'page-number' + (i === currentPage ? ' active' : '');
-                btn.onclick
+                btn.onclick = () => { currentPage = i; renderPage(arr); };
+                controls.appendChild(btn);
+            }
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Próxima';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderPage(arr); }};
+            controls.appendChild(nextBtn);
+        }
+
+        function renderPage(arr) {
+            const start = (currentPage - 1) * rowsPerPage;
+            displayData(arr.slice(start, start + rowsPerPage));
+            setupPagination(arr);
+        }
+
+        function sortData(arr, col, order) {
+            arr.sort((a, b) => {
+                const vA = a[col] ?? '', vB = b[col] ?? '';
+                const nA = parseFloat(String(vA).replace(',', '.'));
+                const nB = parseFloat(String(vB).replace(',', '.'));
+                let cmp = (!isNaN(nA) && !isNaN(nB)) ? (nA - nB) : String(vA).localeCompare(String(vB), 'pt-BR', { sensitivity: 'base' });
+                return order === 'desc' ? -cmp : cmp;
+            });
+        }
+
+        function applyFiltersAndSort() {
+            if (!data) return;
+            let arr = data.slice();
+            // Filtros por coluna
+            Object.keys(columnFilters).forEach(col => {
+                const term = (columnFilters[col] || '').toLowerCase();
+                if (term) arr = arr.filter(item => (item[col] || '').toString().toLowerCase().includes(term));
+            });
+            // Pesquisa geral
+            const search = document.getElementById('search-input').value.toLowerCase();
+            if (search) {
+                arr = arr.filter(item =>
+                    ['CATEGORIA','PROCEDIMENTO','CIDS']
+                        .some(col => (item[col] || '').toString().toLowerCase().includes(search))
+                );
+            }
+            filteredData = arr;
+            if (currentSortColumn) sortData(filteredData, currentSortColumn, currentSortOrder);
+            currentPage = 1;
+            renderPage(filteredData);
+        }
+
+        // Listeners para ordenação
+        function addSortListeners() {
+            document.querySelectorAll('th[data-col]').forEach(th => {
+                th.onclick = () => {
+                    const col = th.getAttribute('data-col');
+                    if (currentSortColumn === col) currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+                    else { currentSortColumn = col; currentSortOrder = 'asc'; }
+                    applyFiltersAndSort();
+                };
+            });
+        }
+        // Listeners para filtros por coluna
+        function addColumnFilterListeners() {
+            document.querySelectorAll('.column-filter-input').forEach(input => {
+                const col = input.getAttribute('data-col');
+                input.oninput = () => { columnFilters[col] = input.value; applyFiltersAndSort(); };
+            });
+        }
+
+        // Pesquisa geral
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('search-input').addEventListener('input', applyFiltersAndSort);
+        });
+
+        // Carrega dados do JSON externo
+        async function loadData() {
+            try {
+                const response = await fetch('dados.json');
+                if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON: ' + response.statusText);
+                data = await response.json();
+                addSortListeners();
+                addColumnFilterListeners();
+                applyFiltersAndSort();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('data-table-body').innerHTML = '<tr><td colspan="6" class="text-center py-4">Erro ao carregar dados.</td></tr>';
+            }
+        }
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>
