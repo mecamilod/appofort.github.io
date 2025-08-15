@@ -23,7 +23,7 @@
         #search-input { padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); transition: border-color 0.15s, box-shadow 0.15s;}
         #search-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.5); outline: none; }
         .column-filter-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.25rem; font-size: 0.875rem; box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);}
-        .column-filter-input:focus { border-color: #3b82f6; box-shadow: inset 0 1-px 2px rgba(0,0,0,0.075), 0 0 0 0.2rem rgba(59,130,246,0.25); outline: none;}
+        .column-filter-input:focus { border-color: #3b82f6; box-shadow: inset 0 1px 2px rgba(0,0,0,0.075), 0 0 0 0.2rem rgba(59,130,246,0.25); outline: none;}
         .pagination button { padding: 0.5rem 1rem; margin: 0 0.25rem; border: 1px solid #d1d5db; border-radius: 0.25rem; background-color: #fff; cursor: pointer; transition: background-color 0.2s;}
         .pagination button:hover:not(:disabled) { background-color: #f3f4f6; }
         .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -42,25 +42,21 @@
         }
         .table-responsive { overflow-x: auto; }
         .sort-icon { font-size: 0.8em; margin-left: 0.5em; vertical-align: middle; }
-        
-        /* Estilos para a funcionalidade de "Ver mais..." */
-        .cid-content {
-            display: -webkit-box;
-            -webkit-line-clamp: 2; /* Limita a 2 linhas, você pode ajustar */
-            -webkit-box-orient: vertical;
+
+        /* Estilos para a nova funcionalidade de "Ver mais..." */
+        .truncated-text {
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 250px; /* Limita a largura do texto para ele ser truncado */
+            display: inline-block;
         }
-        .cid-content.expanded {
-            -webkit-line-clamp: unset;
-            overflow: visible;
-        }
-        .cid-toggle {
+        .toggle-link {
             cursor: pointer;
             color: #3b82f6;
             text-decoration: underline;
             font-size: 0.8em;
-            margin-top: 0.25rem;
+            margin-left: 0.5rem;
             display: inline-block;
         }
     </style>
@@ -122,14 +118,18 @@
             arr.forEach(item => {
                 const row = document.createElement('tr');
                 const cidsContent = item.CIDS || '';
+                const isLongText = cidsContent.length > 50; // Altere este valor para o que preferir
                 
-                let cidsHTML = `
-                    <div class="cid-content">${cidsContent}</div>
-                `;
-                
-                // Adiciona o botão de expandir/recolher se o conteúdo for longo
-                if (cidsContent.length > 50) { // Você pode ajustar este número
-                    cidsHTML += `<div class="cid-toggle">Ver mais...</div>`;
+                let cidsHTML;
+                if (isLongText) {
+                    const shortText = cidsContent.substring(0, 50) + '...';
+                    cidsHTML = `
+                        <span class="truncated-text">${shortText}</span>
+                        <span class="full-text" style="display:none;">${cidsContent}</span>
+                        <a href="#" class="toggle-link">Ver mais...</a>
+                    `;
+                } else {
+                    cidsHTML = cidsContent;
                 }
 
                 row.innerHTML = `
@@ -144,11 +144,22 @@
             });
             
             // Adiciona o listener para expandir/recolher
-            document.querySelectorAll('.cid-toggle').forEach(toggle => {
-                toggle.addEventListener('click', () => {
-                    const content = toggle.previousElementSibling;
-                    const isExpanded = content.classList.toggle('expanded');
-                    toggle.textContent = isExpanded ? 'Ver menos...' : 'Ver mais...';
+            document.querySelectorAll('.toggle-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const parentTd = link.closest('td');
+                    const truncated = parentTd.querySelector('.truncated-text');
+                    const full = parentTd.querySelector('.full-text');
+                    
+                    if (full.style.display === 'none') {
+                        truncated.style.display = 'none';
+                        full.style.display = 'inline';
+                        link.textContent = 'Ver menos...';
+                    } else {
+                        truncated.style.display = 'inline-block';
+                        full.style.display = 'none';
+                        link.textContent = 'Ver mais...';
+                    }
                 });
             });
         }
