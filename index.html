@@ -39,14 +39,14 @@
 <body class="p-4 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-lg">
         <div class="header-container">
-            <img src="/content/logoofort.png" alt="Logo da Oficina Ortopédica da Paraíba" class="logo">
+            <img src="logoofort.png" alt="Logo da Oficina Ortopédica da Paraíba" class="logo">
             <h1 class="text-3xl font-bold text-gray-800 header-title">Procedimentos de OPMEs disponíveis na Oficina Ortopédica da Paraíba</h1>
         </div>
         <div class="mb-6">
             <input
                 type="text"
                 id="search-input"
-                placeholder="Pesquisa geral por procedimento, descrição, CIDs..."
+                placeholder="Pesquisa geral por procedimento, CIDS..."
                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
             >
         </div>
@@ -54,7 +54,7 @@
             <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
                 <input type="text" class="column-filter-input" data-col="CATEGORIA" placeholder="Filtrar Categoria">
                 <input type="text" class="column-filter-input" data-col="PROCEDIMENTO" placeholder="Filtrar Procedimento">
-                <input type="text" class="column-filter-input" data-col="CIDS" placeholder="Filtrar CIDs">
+                <input type="text" class="column-filter-input" data-col="CIDS" placeholder="Filtrar CIDS">
             </div>
         </div>
         <div class="overflow-x-auto">
@@ -66,7 +66,7 @@
                         <th data-col="IDADE MÍNIMA">IDADE MÍNIMA</th>
                         <th data-col="IDADE MÁXIMA">IDADE MÁXIMA</th>
                         <th data-col="QUANTIDADE MÁXIMA">QUANTIDADE MÁXIMA</th>
-                        <th data-col="CIDs">CIDs</th>
+                        <th data-col="CIDS">CIDS</th>
                     </tr>
                 </thead>
                 <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
@@ -200,7 +200,7 @@
         });
 
         // Carrega dados do JSON externo
-        async function loadData(dados.json) {
+        async function loadData() {
             try {
                 const response = await fetch('dados.json');
                 if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON: ' + response.statusText);
