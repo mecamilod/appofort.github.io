@@ -6,7 +6,6 @@
     <title>Procedimentos de OPMEs disponíveis no SIGTAP/SUS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* [Seus estilos mantidos aqui, sem alterações] */
         body {
             font-family: 'Times New Roman', serif;
             font-size: 12px;
@@ -46,7 +45,7 @@
             <input
                 type="text"
                 id="search-input"
-                placeholder="Pesquisa geral por procedimento, CIDS..."
+                placeholder="Pesquisa geral por procedimento, categoria, CIDs..."
                 class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
             >
         </div>
@@ -54,19 +53,19 @@
             <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
                 <input type="text" class="column-filter-input" data-col="CATEGORIA" placeholder="Filtrar Categoria">
                 <input type="text" class="column-filter-input" data-col="PROCEDIMENTO" placeholder="Filtrar Procedimento">
-                <input type="text" class="column-filter-input" data-col="CIDS" placeholder="Filtrar CIDS">
+                <input type="text" class="column-filter-input" data-col="CIDS" placeholder="Filtrar CIDs">
             </div>
         </div>
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
                     <tr>
-                        <th data-col="CATEGORIA">CATEGORIA</th>
-                        <th data-col="PROCEDIMENTO">PROCEDIMENTO</th>
-                        <th data-col="IDADE MÍNIMA">IDADE MÍNIMA</th>
-                        <th data-col="IDADE MÁXIMA">IDADE MÁXIMA</th>
-                        <th data-col="QUANTIDADE MÁXIMA">QUANTIDADE MÁXIMA</th>
-                        <th data-col="CIDS">CIDS</th>
+                        <th scope="col" data-col="CATEGORIA">CATEGORIA</th>
+                        <th scope="col" data-col="PROCEDIMENTO">PROCEDIMENTO</th>
+                        <th scope="col" data-col="IDADE MÍNIMA">IDADE MÍNIMA</th>
+                        <th scope="col" data-col="IDADE MÁXIMA">IDADE MÁXIMA</th>
+                        <th scope="col" data-col="QUANTIDADE MÁXIMA">QUANTIDADE MÁXIMA</th>
+                        <th scope="col" data-col="CIDS">CIDs</th>
                     </tr>
                 </thead>
                 <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
@@ -89,7 +88,7 @@
             const tbody = document.getElementById('data-table-body');
             tbody.innerHTML = '';
             if (!arr || arr.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Nenhum dado encontrado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Nenhum dado encontrado.</td></tr>';
                 return;
             }
             arr.forEach(item => {
@@ -165,7 +164,7 @@
             const search = document.getElementById('search-input').value.toLowerCase();
             if (search) {
                 arr = arr.filter(item =>
-                    ['CATEGORIA','PROCEDIMENTO','CIDs']
+                    ['CATEGORIA','PROCEDIMENTO','CIDS']
                         .some(col => (item[col] || '').toString().toLowerCase().includes(search))
                 );
             }
@@ -210,7 +209,7 @@
                 applyFiltersAndSort();
             } catch (e) {
                 console.error(e);
-                document.getElementById('data-table-body').innerHTML = '<tr><td colspan="7" class="text-center py-4">Erro ao carregar dados.</td></tr>';
+                document.getElementById('data-table-body').innerHTML = '<tr><td colspan="6" class="text-center py-4">Erro ao carregar dados.</td></tr>';
             }
         }
         document.addEventListener('DOMContentLoaded', loadData);
