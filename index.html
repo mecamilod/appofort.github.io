@@ -4,213 +4,204 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Procedimentos de OPMEs disponíveis no SIGTAP/SUS</title>
-    <!-- Inclui o Tailwind CSS para estilização -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* ... [SEUS ESTILOS, TODOS OK] ... */
+        /* [Seus estilos mantidos aqui, sem alterações] */
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 12px;
+            background-color: #a7b2eb;
+            line-height: 1.6;
+        }
+        th, td { padding: 0.75rem 1.5rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        th { background-color: #e0e7ff; color: #312e81; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;}
+        th:hover { background-color: #c3dafe; }
+        tr:hover { background-color: #f3f4f6; }
+        table { border-collapse: collapse; width: 100%; border-radius: 0.5rem; overflow: hidden; }
+        td:first-child { font-weight: 500; color: #4b5563; }
+        td:nth-child(2) { font-family: monospace; color: #1f2937; }
+        td:last-child { font-size: 0.875rem; color: #6b7280; }
+        #search-input { padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); transition: border-color 0.15s, box-shadow 0.15s;}
+        #search-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.5); outline: none; }
+        .column-filter-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.25rem; font-size: 0.875rem; box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);}
+        .column-filter-input:focus { border-color: #3b82f6; box-shadow: inset 0 1px 2px rgba(0,0,0,0.075), 0 0 0 0.2rem rgba(59,130,246,0.25); outline: none;}
+        .pagination button { padding: 0.5rem 1rem; margin: 0 0.25rem; border: 1px solid #d1d5db; border-radius: 0.25rem; background-color: #fff; cursor: pointer; transition: background-color 0.2s;}
+        .pagination button:hover:not(:disabled) { background-color: #f3f4f6; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination .page-number { padding: 0.5rem 0.75rem; margin: 0 0.25rem; border: 1px solid #d1d5db; border-radius: 0.25rem; background-color: #fff; cursor: pointer; transition: background-color 0.2s;}
+        .pagination .page-number.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .header-container { display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+        .logo { height: 4rem; margin-right: 1rem; display: inline-block; }
+        .header-title { text-align: left; margin: 0;}
+        .footer-text { font-size: 10px; text-align: left; margin-top: 2rem; color: #4b5563;}
     </style>
 </head>
 <body class="p-4 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto bg-white p-6 rounded-xl shadow-lg">
-        <!-- [RESTANTE DO SEU HTML, IGUAL] -->
-        <!-- Contêiner para a Logo e o Título -->
         <div class="header-container">
             <img src="/content/logoofort.png" alt="Logo da Oficina Ortopédica da Paraíba" class="logo">
             <h1 class="text-3xl font-bold text-gray-800 header-title">Procedimentos de OPMEs disponíveis na Oficina Ortopédica da Paraíba</h1>
         </div>
-        <!-- ... [RESTANTE DO SEU HTML] ... -->
+        <div class="mb-6">
+            <input
+                type="text"
+                id="search-input"
+                placeholder="Pesquisa geral por procedimento, descrição, CIDs..."
+                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+            >
+        </div>
+        <div class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-7 gap-4">
+                <input type="text" class="column-filter-input" data-col="CATEGORIA" placeholder="Filtrar Categoria">
+                <input type="text" class="column-filter-input" data-col="PROCEDIMENTO" placeholder="Filtrar Procedimento">
+                <input type="text" class="column-filter-input" data-col="CIDS" placeholder="Filtrar CIDs">
+            </div>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr>
+                        <th data-col="CATEGORIA">CATEGORIA</th>
+                        <th data-col="PROCEDIMENTO">PROCEDIMENTO</th>
+                        <th data-col="DESCRIÇÃO">DESCRIÇÃO</th>
+                        <th data-col="IDADE MÍNIMA">IDADE MÍNIMA</th>
+                        <th data-col="IDADE MÁXIMA">IDADE MÁXIMA</th>
+                        <th data-col="QUANTIDADE MÁXIMA">QUANTIDADE MÁXIMA</th>
+                        <th data-col="CIDS">CIDs</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
+                    <!-- Dados inseridos via JS -->
+                </tbody>
+            </table>
+        </div>
+        <div id="pagination-controls" class="pagination mt-6 flex justify-center items-center"></div>
         <div class="footer-text">
             Criado por: Maria Eduarda Camilo Damião (Atualização 08/2025)
         </div>
     </div>
     <script>
-        let data = null; // Variável para armazenar os dados JSON carregados
-        let filteredData = null;
-        let currentPage = 1;
-        const rowsPerPage = 20;
-        let currentSortColumn = 'CATEGORIA';
-        let currentSortOrder = 'asc';
-        const columnFilters = {};
+        let data = [], filteredData = [];
+        let currentPage = 1, currentSortColumn = 'CATEGORIA', currentSortOrder = 'asc';
+        const rowsPerPage = 20, columnFilters = {};
 
-        function displayData(dataToDisplay) {
-            const tableBody = document.getElementById('data-table-body');
-            tableBody.innerHTML = '';
-            if (!dataToDisplay || dataToDisplay.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Nenhum dado encontrado.</td></tr>';
+        // Cria linhas da tabela
+        function displayData(arr) {
+            const tbody = document.getElementById('data-table-body');
+            tbody.innerHTML = '';
+            if (!arr || arr.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Nenhum dado encontrado.</td></tr>';
                 return;
             }
-            dataToDisplay.forEach(item => {
+            arr.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap">${item.CATEGORIA || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${item.PROCEDIMENTO || ''}</td>
-                    <td class="px-6 py-4">${item.DESCRIÇÃO || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${item['IDADE MÍNIMA'] || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${item['IDADE MÁXIMA'] || ''}</td>
-                    <td class="px-6 py-4 whitespace-nowrap">${item['QUANTIDADE MÁXIMA'] || ''}</td>
-                    <td class="px-6 py-4">${item.CIDS || ''}</td>
+                    <td>${item.CATEGORIA || ''}</td>
+                    <td>${item.PROCEDIMENTO || ''}</td>
+                    <td>${item.DESCRIÇÃO || ''}</td>
+                    <td>${item['IDADE MÍNIMA'] || ''}</td>
+                    <td>${item['IDADE MÁXIMA'] || ''}</td>
+                    <td>${item['QUANTIDADE MÁXIMA'] || ''}</td>
+                    <td>${item.CIDS || ''}</td>
                 `;
-                tableBody.appendChild(row);
+                tbody.appendChild(row);
             });
         }
-        function updatePaginationButtonStates(totalPages) {
-            const prevButton = document.querySelector('.pagination button:first-child');
-            const nextButton = document.querySelector('.pagination button:last-child');
-            const pageButtons = document.querySelectorAll('.pagination .page-number');
-            if (prevButton) prevButton.disabled = currentPage === 1;
-            if (nextButton) nextButton.disabled = currentPage === totalPages;
-            pageButtons.forEach(button => {
-                button.classList.remove('active');
-                if (parseInt(button.textContent) === currentPage) {
-                    button.classList.add('active');
-                }
-            });
-        }
-        function setupPagination(dataArray) {
-            const paginationControls = document.getElementById('pagination-controls');
-            paginationControls.innerHTML = '';
-            const totalPages = Math.ceil(dataArray.length / rowsPerPage);
+
+        // Paginação
+        function setupPagination(arr) {
+            const controls = document.getElementById('pagination-controls');
+            controls.innerHTML = '';
+            const totalPages = Math.ceil(arr.length / rowsPerPage);
             if (totalPages <= 1) return;
-            const prevButton = document.createElement('button');
-            prevButton.textContent = 'Anterior';
-            prevButton.disabled = currentPage === 1;
-            prevButton.addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderPage(dataArray);
-                }
-            });
-            paginationControls.appendChild(prevButton);
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = 'Anterior';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderPage(arr); }};
+            controls.appendChild(prevBtn);
+
             const maxPageButtons = 5;
             let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
             let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
-            if (endPage - startPage + 1 < maxPageButtons) {
-                startPage = Math.max(1, endPage - maxPageButtons + 1);
-            }
+            if (endPage - startPage + 1 < maxPageButtons) startPage = Math.max(1, endPage - maxPageButtons + 1);
+
             for (let i = startPage; i <= endPage; i++) {
-                const pageButton = document.createElement('button');
-                pageButton.textContent = i;
-                pageButton.classList.add('page-number');
-                if (i === currentPage) {
-                    pageButton.classList.add('active');
-                }
-                pageButton.addEventListener('click', () => {
-                    currentPage = i;
-                    renderPage(dataArray);
-                });
-                paginationControls.appendChild(pageButton);
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = 'page-number' + (i === currentPage ? ' active' : '');
+                btn.onclick = () => { currentPage = i; renderPage(arr); };
+                controls.appendChild(btn);
             }
-            const nextButton = document.createElement('button');
-            nextButton.textContent = 'Próxima';
-            nextButton.disabled = currentPage === totalPages;
-            nextButton.addEventListener('click', () => {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderPage(dataArray);
-                }
-            });
-            paginationControls.appendChild(nextButton);
-            updatePaginationButtonStates(totalPages);
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Próxima';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderPage(arr); }};
+            controls.appendChild(nextBtn);
         }
-        function renderPage(dataArray) {
+
+        function renderPage(arr) {
             const start = (currentPage - 1) * rowsPerPage;
-            const end = start + rowsPerPage;
-            const paginatedData = dataArray.slice(start, end);
-            displayData(paginatedData);
-            setupPagination(dataArray);
+            displayData(arr.slice(start, start + rowsPerPage));
+            setupPagination(arr);
         }
-        function sortData(dataArray, column, order) {
-            dataArray.sort((a, b) => {
-                const valA = a[column];
-                const valB = b[column];
-                const strA = (valA === null || valA === undefined) ? '' : String(valA);
-                const strB = (valB === null || valB === undefined) ? '' : String(valB);
-                const numA = parseFloat(strA.replace(',', '.'));
-                const numB = parseFloat(strB.replace(',', '.'));
-                let comparison = 0;
-                if (!isNaN(numA) && !isNaN(numB)) {
-                    if (numA < numB) comparison = -1;
-                    else if (numA > numB) comparison = 1;
-                } else {
-                    comparison = strA.localeCompare(strB, 'pt-BR', { sensitivity: 'base' });
-                }
-                if (order === 'desc') return comparison * -1;
-                return comparison;
+
+        function sortData(arr, col, order) {
+            arr.sort((a, b) => {
+                const vA = a[col] ?? '', vB = b[col] ?? '';
+                const nA = parseFloat(String(vA).replace(',', '.'));
+                const nB = parseFloat(String(vB).replace(',', '.'));
+                let cmp = (!isNaN(nA) && !isNaN(nB)) ? (nA - nB) : String(vA).localeCompare(String(vB), 'pt-BR', { sensitivity: 'base' });
+                return order === 'desc' ? -cmp : cmp;
             });
         }
+
         function applyFiltersAndSort() {
             if (!data) return;
-            let currentFilteredData = [...data];
-            const columnFilterKeys = Object.keys(columnFilters);
-            if (columnFilterKeys.length > 0) {
-                currentFilteredData = currentFilteredData.filter(item => {
-                    let match = true;
-                    for (const col of columnFilterKeys) {
-                        const filterTerm = columnFilters[col].toLowerCase();
-                        if (filterTerm) {
-                            const itemValue = item[col] ? String(item[col]).toLowerCase() : '';
-                            if (!itemValue.includes(filterTerm)) {
-                                match = false;
-                                break;
-                            }
-                        }
-                    }
-                    return match;
-                });
+            let arr = data.slice();
+            // Filtros por coluna
+            Object.keys(columnFilters).forEach(col => {
+                const term = (columnFilters[col] || '').toLowerCase();
+                if (term) arr = arr.filter(item => (item[col] || '').toString().toLowerCase().includes(term));
+            });
+            // Pesquisa geral
+            const search = document.getElementById('search-input').value.toLowerCase();
+            if (search) {
+                arr = arr.filter(item =>
+                    ['CATEGORIA','PROCEDIMENTO','DESCRIÇÃO','CIDS']
+                        .some(col => (item[col] || '').toString().toLowerCase().includes(search))
+                );
             }
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            if (searchTerm) {
-                currentFilteredData = currentFilteredData.filter(item => {
-                    const categoria = item.CATEGORIA ? String(item.CATEGORIA).toLowerCase() : '';
-                    const procedimento = item.PROCEDIMENTO ? String(item.PROCEDIMENTO).toLowerCase() : '';
-                    const descricao = item.DESCRIÇÃO ? String(item.DESCRIÇÃO).toLowerCase() : '';
-                    const cids = item.CIDS ? String(item.CIDS).toLowerCase() : '';
-                    return (
-                        categoria.includes(searchTerm) ||
-                        procedimento.includes(searchTerm) ||
-                        descricao.includes(searchTerm) ||
-                        cids.includes(searchTerm)
-                    );
-                });
-            }
-            filteredData = currentFilteredData;
-            if (currentSortColumn) {
-                sortData(filteredData, currentSortColumn, currentSortOrder);
-            }
+            filteredData = arr;
+            if (currentSortColumn) sortData(filteredData, currentSortColumn, currentSortOrder);
             currentPage = 1;
-            setupPagination(filteredData);
             renderPage(filteredData);
         }
-        function addSortListeners() {
-            const headers = document.querySelectorAll('th[data-col]');
-            headers.forEach(header => {
-                const column = header.getAttribute('data-col');
-                header.addEventListener('click', () => {
-                    if (currentSortColumn === column) {
-                        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        currentSortColumn = column;
-                        currentSortOrder = 'asc';
-                    }
-                    applyFiltersAndSort();
-                });
-            });
-        }
-        function addColumnFilterListeners() {
-            const filterInputs = document.querySelectorAll('.column-filter-input');
-            filterInputs.forEach(input => {
-                const column = input.getAttribute('data-col');
-                if (column) {
-                    input.addEventListener('input', () => {
-                        columnFilters[column] = input.value;
-                        applyFiltersAndSort();
-                    });
-                }
-            });
-        }
-        document.getElementById('search-input').addEventListener('input', applyFiltersAndSort);
 
-        // Função para carregar o JSON do arquivo externo
+        // Listeners para ordenação
+        function addSortListeners() {
+            document.querySelectorAll('th[data-col]').forEach(th => {
+                th.onclick = () => {
+                    const col = th.getAttribute('data-col');
+                    if (currentSortColumn === col) currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+                    else { currentSortColumn = col; currentSortOrder = 'asc'; }
+                    applyFiltersAndSort();
+                };
+            });
+        }
+        // Listeners para filtros por coluna
+        function addColumnFilterListeners() {
+            document.querySelectorAll('.column-filter-input').forEach(input => {
+                const col = input.getAttribute('data-col');
+                input.oninput = () => { columnFilters[col] = input.value; applyFiltersAndSort(); };
+            });
+        }
+
+        // Pesquisa geral
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('search-input').addEventListener('input', applyFiltersAndSort);
+        });
+
+        // Carrega dados do JSON externo
         async function loadData() {
             try {
                 const response = await fetch('dados.json');
@@ -219,14 +210,12 @@
                 addSortListeners();
                 addColumnFilterListeners();
                 applyFiltersAndSort();
-            } catch (error) {
-                console.error("Erro ao carregar ou analisar dados:", error);
+            } catch (e) {
+                console.error(e);
                 document.getElementById('data-table-body').innerHTML = '<tr><td colspan="7" class="text-center py-4">Erro ao carregar dados.</td></tr>';
             }
         }
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-        });
+        document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
 </html>
