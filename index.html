@@ -43,18 +43,21 @@
         .table-responsive { overflow-x: auto; }
         .sort-icon { font-size: 0.8em; margin-left: 0.5em; vertical-align: middle; }
 
-        /* Estilos para a nova funcionalidade de "Ver mais..." */
-        .truncated-text {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            max-width: 250px; /* Limita a largura do texto para ele ser truncado */
-            display: inline-block;
+        /* Estilos para a funcionalidade de "Ver mais..." */
+        .cid-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: inline;
         }
-        .toggle-link {
+        .cid-item {
+            display: inline;
+            white-space: nowrap;
+        }
+        .cid-toggle {
             cursor: pointer;
             color: #3b82f6;
-            text-decoration: underline;
+            text-decoration: none;
             font-size: 0.8em;
             margin-left: 0.5rem;
             display: inline-block;
@@ -118,18 +121,28 @@
             arr.forEach(item => {
                 const row = document.createElement('tr');
                 const cidsContent = item.CIDS || '';
-                const isLongText = cidsContent.length > 50; // Altere este valor para o que preferir
+                const cidsArray = cidsContent.split(',').map(cid => cid.trim()).filter(cid => cid);
                 
-                let cidsHTML;
-                if (isLongText) {
-                    const shortText = cidsContent.substring(0, 50) + '...';
+                let cidsHTML = '';
+                const displayCount = 5;
+
+                if (cidsArray.length > displayCount) {
+                    const visibleCids = cidsArray.slice(0, displayCount);
+                    const hiddenCids = cidsArray.slice(displayCount);
+                    
                     cidsHTML = `
-                        <span class="truncated-text">${shortText}</span>
-                        <span class="full-text" style="display:none;">${cidsContent}</span>
-                        <a href="#" class="toggle-link">Ver mais...</a>
+                        <ul class="cid-list">
+                            ${visibleCids.map(cid => `<li class="cid-item">${cid}, </li>`).join('')}
+                        </ul>
+                        <span class="hidden-cids" style="display:none;">
+                            <ul class="cid-list">
+                                ${hiddenCids.map(cid => `<li class="cid-item">${cid}, </li>`).join('')}
+                            </ul>
+                        </span>
+                        <a href="#" class="cid-toggle" data-state="collapsed">[+] Ver mais</a>
                     `;
                 } else {
-                    cidsHTML = cidsContent;
+                    cidsHTML = `<ul class="cid-list">${cidsArray.map(cid => `<li class="cid-item">${cid}, </li>`).join('')}</ul>`;
                 }
 
                 row.innerHTML = `
@@ -144,21 +157,19 @@
             });
             
             // Adiciona o listener para expandir/recolher
-            document.querySelectorAll('.toggle-link').forEach(link => {
-                link.addEventListener('click', (e) => {
+            document.querySelectorAll('.cid-toggle').forEach(toggle => {
+                toggle.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const parentTd = link.closest('td');
-                    const truncated = parentTd.querySelector('.truncated-text');
-                    const full = parentTd.querySelector('.full-text');
+                    const hiddenCids = toggle.previousElementSibling;
                     
-                    if (full.style.display === 'none') {
-                        truncated.style.display = 'none';
-                        full.style.display = 'inline';
-                        link.textContent = 'Ver menos...';
+                    if (toggle.dataset.state === 'collapsed') {
+                        hiddenCids.style.display = 'inline';
+                        toggle.textContent = '[-] Ver menos';
+                        toggle.dataset.state = 'expanded';
                     } else {
-                        truncated.style.display = 'inline-block';
-                        full.style.display = 'none';
-                        link.textContent = 'Ver mais...';
+                        hiddenCids.style.display = 'none';
+                        toggle.textContent = '[+] Ver mais';
+                        toggle.dataset.state = 'collapsed';
                     }
                 });
             });
@@ -184,100 +195,4 @@
                 const btn = document.createElement('button');
                 btn.textContent = i;
                 btn.className = 'page-number' + (i === currentPage ? ' active' : '');
-                btn.onclick = () => { currentPage = i; renderPage(arr); };
-                controls.appendChild(btn);
-            }
-            const nextBtn = document.createElement('button');
-            nextBtn.textContent = 'Próxima';
-            nextBtn.disabled = currentPage === totalPages;
-            nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderPage(arr); }};
-            controls.appendChild(nextBtn);
-        }
-
-        function renderPage(arr) {
-            const start = (currentPage - 1) * rowsPerPage;
-            displayData(arr.slice(start, start + rowsPerPage));
-            setupPagination(arr);
-        }
-
-        function sortData(arr, col, order) {
-            arr.sort((a, b) => {
-                const vA = a[col] ?? '', vB = b[col] ?? '';
-                const nA = parseFloat(String(vA).replace(',', '.'));
-                const nB = parseFloat(String(vB).replace(',', '.'));
-                let cmp = (!isNaN(nA) && !isNaN(nB)) ? (nA - nB) : String(vA).localeCompare(String(vB), 'pt-BR', { sensitivity: 'base' });
-                return order === 'desc' ? -cmp : cmp;
-            });
-        }
-
-        function applyFiltersAndSort() {
-            if (!data) return;
-            let arr = data.slice();
-            // Filtros por coluna
-            Object.keys(columnFilters).forEach(col => {
-                const term = (columnFilters[col] || '').toLowerCase();
-                if (term) arr = arr.filter(item => (item[col] || '').toString().toLowerCase().includes(term));
-            });
-            // Pesquisa geral
-            const search = document.getElementById('search-input').value.toLowerCase();
-            if (search) {
-                arr = arr.filter(item =>
-                    ['CATEGORIA','PROCEDIMENTO','CIDS']
-                        .some(col => (item[col] || '').toString().toLowerCase().includes(search))
-                );
-            }
-            filteredData = arr;
-            if (currentSortColumn) sortData(filteredData, currentSortColumn, currentSortOrder);
-            currentPage = 1;
-            renderPage(filteredData);
-        }
-
-        function addSortListeners() {
-            document.querySelectorAll('th[data-col]').forEach(th => {
-                th.onclick = () => {
-                    const col = th.getAttribute('data-col');
-                    if (currentSortColumn === col) {
-                        currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
-                    } else {
-                        currentSortColumn = col;
-                        currentSortOrder = 'asc';
-                    }
-                    
-                    document.querySelectorAll('.sort-icon').forEach(icon => icon.textContent = '');
-                    const icon = th.querySelector('.sort-icon');
-                    if (icon) {
-                        icon.textContent = currentSortOrder === 'asc' ? '▲' : '▼';
-                    }
-                    
-                    applyFiltersAndSort();
-                };
-            });
-        }
-        function addColumnFilterListeners() {
-            document.querySelectorAll('.column-filter-input').forEach(input => {
-                const col = input.getAttribute('data-col');
-                input.oninput = () => { columnFilters[col] = input.value; applyFiltersAndSort(); };
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('search-input').addEventListener('input', applyFiltersAndSort);
-        });
-
-        async function loadData() {
-            try {
-                const response = await fetch('dados.json');
-                if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON: ' + response.statusText);
-                data = await response.json();
-                addSortListeners();
-                addColumnFilterListeners();
-                applyFiltersAndSort();
-            } catch (e) {
-                console.error(e);
-                document.getElementById('data-table-body').innerHTML = '<tr><td colspan="6" class="text-center py-4">Erro ao carregar dados.</td></tr>';
-            }
-        }
-        document.addEventListener('DOMContentLoaded', loadData);
-    </script>
-</body>
-</html>
+                btn.onclick
