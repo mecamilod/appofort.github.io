@@ -13,4 +13,279 @@
             line-height: 1.6;
         }
         th, td { padding: 0.75rem 1.5rem; text-align: left; border-bottom: 1px solid #e5e7eb; }
-        th { background-color: #e0e7ff; color: #312e8
+        th { background-color: #e0e7ff; color: #312e81; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;}
+        th:hover { background-color: #c3dafe; }
+        tr:hover { background-color: #f3f4f6; }
+        table { border-collapse: collapse; width: 100%; border-radius: 0.5rem; overflow: hidden; }
+        td:first-child { font-weight: 500; color: #4b5563; }
+        td:nth-child(2) { font-family: monospace; color: #1f2937; }
+        td:last-child { font-size: 0.875rem; color: #6b7280; }
+        .hidden { display: none; } /* Adiciona a classe hidden para ser usada no HTML */
+        #search-input { padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); transition: border-color 0.15s, box-shadow 0.15s;}
+        #search-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.5); outline: none; }
+        .column-filter-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.25rem; font-size: 0.875rem; box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);}
+        .column-filter-input:focus { border-color: #3b82f6; box-shadow: inset 0 1px 2px rgba(0,0,0,0.075), 0 0 0 0.2rem rgba(59,130,246,0.25); outline: none;}
+        .pagination button { padding: 0.5rem 1rem; margin: 0 0.25rem; border: 1px solid #d1d5db; border-radius: 0.25rem; background-color: #fff; cursor: pointer; transition: background-color 0.2s;}
+        .pagination button:hover:not(:disabled) { background-color: #f3f4f6; }
+        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .pagination .page-number { padding: 0.5rem 0.75rem; margin: 0 0.25rem; border: 1px solid #d1d5db; border-radius: 0.25rem; background-color: #fff; cursor: pointer; transition: background-color 0.2s;}
+        .pagination .page-number.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .header-container { display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .logo { height: 50px; max-width: 80vw; margin-right: 1rem; display: inline-block; }
+        .header-title { text-align: left; margin: 0; font-size: 1.5rem;}
+        .footer-text { font-size: 12px; text-align: left; margin-top: 2rem; color: #4b5563;}
+        @media (max-width: 640px) {
+            .logo { height: 50px; margin-right: 0.5rem; }
+            .header-container { flex-direction: column; align-items: flex-start; }
+            .header-title { font-size: 1.1rem; margin-top: 0.5rem;}
+            th, td { padding: 0.4rem 0.6rem; font-size: 0.85rem;}
+            .footer-text { font-size: 9px;}
+        }
+        .table-responsive { overflow-x: auto; }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="p-2 sm:p-6 lg:p-8">
+
+    <div class="max-w-7xl mx-auto bg-white p-2 sm:p-6 rounded-xl shadow-lg mb-4">
+        <h2 class="text-2xl font-bold text-gray-700 mb-4">Formulário de Acesso</h2>
+        <form id="access-form">
+            <div class="mb-4">
+                <label for="user-name" class="block text-sm font-medium text-gray-700">Nome do Usuário</label>
+                <input type="text" id="user-name" name="user-name" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg" required>
+            </div>
+            <div class="mb-4">
+                <label for="primary-cid" class="block text-sm font-medium text-gray-700">CID Principal</label>
+                <input type="text" id="primary-cid" name="primary-cid" class="mt-1 block w-full p-3 border border-gray-300 rounded-lg" placeholder="Ex: M16.1" required>
+            </div>
+            <div class="text-right">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-search mr-2"></i>
+                    Consultar Procedimentos
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div id="results-container" class="max-w-7xl mx-auto bg-white p-2 sm:p-6 rounded-xl shadow-lg hidden">
+        <div class="header-container">
+            <img src="logoofort.png" alt="Logo da Oficina Ortopédica da Paraíba" class="logo">
+            <h1 class="text-3xl font-bold text-gray-800 header-title">Procedimentos de OPMEs disponíveis na Oficina Ortopédica da Paraíba</h1>
+        </div>
+        
+        <div class="mb-4 relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+            </div>
+            <input
+                type="text"
+                id="search-input"
+                placeholder="Pesquisa geral por procedimento, categoria, CIDs..."
+                class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+            >
+        </div>
+        
+        <div class="mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-7 gap-2">
+                <input type="text" class="column-filter-input" data-col="CATEGORIA" placeholder="Filtrar Categoria">
+                <input type="text" class="column-filter-input" data-col="PROCEDIMENTO" placeholder="Filtrar Procedimento">
+                <input type="text" class="column-filter-input" data-col="CIDS" placeholder="Filtrar CIDs">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead>
+                    <tr>
+                        <th scope="col" data-col="CATEGORIA">CATEGORIA</th>
+                        <th scope="col" data-col="PROCEDIMENTO">PROCEDIMENTO</th>
+                        <th scope="col" data-col="IDADE MÍNIMA">IDADE MÍNIMA</th>
+                        <th scope="col" data-col="IDADE MÁXIMA">IDADE MÁXIMA</th>
+                        <th scope="col" data-col="QUANTIDADE MÁXIMA">QUANTIDADE MÁXIMA</th>
+                        <th scope="col" data-col="CIDS">CIDs</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
+                    </tbody>
+            </table>
+        </div>
+        <div id="pagination-controls" class="pagination mt-6 flex justify-center items-center"></div>
+        <div class="footer-text">
+            Criado por: Maria Eduarda Camilo Damião (Atualização 08/2025)
+        </div>
+    </div>
+    <script>
+        let data = [], filteredData = [];
+        let currentPage = 1, currentSortColumn = 'CATEGORIA', currentSortOrder = 'asc';
+        const rowsPerPage = 20, columnFilters = {};
+
+        // Cria linhas da tabela
+        function displayData(arr) {
+            const tbody = document.getElementById('data-table-body');
+            tbody.innerHTML = '';
+            if (!arr || arr.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center py-4">Nenhum dado encontrado.</td></tr>';
+                return;
+            }
+            arr.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.CATEGORIA || ''}</td>
+                    <td>${item.PROCEDIMENTO || ''}</td>
+                    <td>${item['IDADE MÍNIMA'] || ''}</td>
+                    <td>${item['IDADE MÁXIMA'] || ''}</td>
+                    <td>${item['QUANTIDADE MÁXIMA'] || ''}</td>
+                    <td>${item.CIDS || ''}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Paginação
+        function setupPagination(arr) {
+            const controls = document.getElementById('pagination-controls');
+            controls.innerHTML = '';
+            const totalPages = Math.ceil(arr.length / rowsPerPage);
+            if (totalPages <= 1) return;
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = 'Anterior';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.onclick = () => { if (currentPage > 1) { currentPage--; renderPage(arr); }};
+            controls.appendChild(prevBtn);
+
+            const maxPageButtons = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+            if (endPage - startPage + 1 < maxPageButtons) startPage = Math.max(1, endPage - maxPageButtons + 1);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = i;
+                btn.className = 'page-number' + (i === currentPage ? ' active' : '');
+                btn.onclick = () => { currentPage = i; renderPage(arr); };
+                controls.appendChild(btn);
+            }
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Próxima';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.onclick = () => { if (currentPage < totalPages) { currentPage++; renderPage(arr); }};
+            controls.appendChild(nextBtn);
+        }
+
+        function renderPage(arr) {
+            const start = (currentPage - 1) * rowsPerPage;
+            displayData(arr.slice(start, start + rowsPerPage));
+            setupPagination(arr);
+        }
+
+        function sortData(arr, col, order) {
+            arr.sort((a, b) => {
+                const vA = a[col] ?? '', vB = b[col] ?? '';
+                const nA = parseFloat(String(vA).replace(',', '.'));
+                const nB = parseFloat(String(vB).replace(',', '.'));
+                let cmp = (!isNaN(nA) && !isNaN(nB)) ? (nA - nB) : String(vA).localeCompare(String(vB), 'pt-BR', { sensitivity: 'base' });
+                return order === 'desc' ? -cmp : cmp;
+            });
+        }
+
+        function applyFiltersAndSort() {
+            if (!data) return;
+            let arr = data.slice();
+            // Filtros por coluna
+            Object.keys(columnFilters).forEach(col => {
+                const term = (columnFilters[col] || '').toLowerCase();
+                if (term) arr = arr.filter(item => (item[col] || '').toString().toLowerCase().includes(term));
+            });
+            // Pesquisa geral
+            const search = document.getElementById('search-input').value.toLowerCase();
+            if (search) {
+                arr = arr.filter(item =>
+                    ['CATEGORIA','PROCEDIMENTO','CIDS']
+                        .some(col => (item[col] || '').toString().toLowerCase().includes(search))
+                );
+            }
+            filteredData = arr;
+            if (currentSortColumn) sortData(filteredData, currentSortColumn, currentSortOrder);
+            currentPage = 1;
+            renderPage(filteredData);
+        }
+
+        // Filtra a tabela com base no CID principal
+        function filterByCID(cid) {
+            if (!data) return;
+            const term = (cid || '').toLowerCase().trim();
+            if (!term) {
+                // Se o CID for vazio, mostra todos os dados
+                filteredData = data.slice();
+            } else {
+                filteredData = data.filter(item => {
+                    const cids = (item.CIDS || '').toLowerCase();
+                    return cids.includes(term);
+                });
+            }
+            currentPage = 1;
+            renderPage(filteredData);
+        }
+
+        // Listeners para ordenação
+        function addSortListeners() {
+            document.querySelectorAll('th[data-col]').forEach(th => {
+                th.onclick = () => {
+                    const col = th.getAttribute('data-col');
+                    if (currentSortColumn === col) currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+                    else { currentSortColumn = col; currentSortOrder = 'asc'; }
+                    applyFiltersAndSort();
+                };
+            });
+        }
+        
+        // Listeners para filtros por coluna
+        function addColumnFilterListeners() {
+            document.querySelectorAll('.column-filter-input').forEach(input => {
+                const col = input.getAttribute('data-col');
+                input.oninput = () => { columnFilters[col] = input.value; applyFiltersAndSort(); };
+            });
+        }
+
+        // Ouve o evento de envio do formulário
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('access-form');
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault(); // Impede o envio padrão do formulário
+        
+                // Carrega os dados do JSON apenas quando o botão é clicado
+                await loadData();
+        
+                const cid = document.getElementById('primary-cid').value;
+                const userName = document.getElementById('user-name').value;
+        
+                // Mostra o contêiner de resultados
+                document.getElementById('results-container').classList.remove('hidden');
+        
+                // Atualiza o título da tabela para indicar o filtro aplicado
+                const tableTitle = document.querySelector('.header-title');
+                tableTitle.textContent = `Procedimentos para o paciente: ${userName} (CID: ${cid})`;
+
+                // Filtra a tabela com base no CID
+                filterByCID(cid);
+
+                // Adiciona o listener para o campo de pesquisa geral, apenas após a tabela ser exibida
+                document.getElementById('search-input').addEventListener('input', applyFiltersAndSort);
+            });
+        });
+
+        // Carrega dados do JSON externo e inicializa a aplicação
+        async function loadData() {
+            try {
+                const response = await fetch('dados.json');
+                if (!response.ok) throw new Error('Erro ao carregar o arquivo JSON: ' + response.statusText);
+                data = await response.json();
+                addSortListeners();
+                addColumnFilterListeners();
+            } catch (e) {
+                console.error(e);
+                document.getElementById('data-table-body').innerHTML = '<tr><td colspan="6" class="text-center py-4">Erro ao carregar dados.</td></tr>';
+            }
+        }
+    </script>
+</body>
+</html>
