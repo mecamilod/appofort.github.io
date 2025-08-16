@@ -42,8 +42,7 @@
         }
         .table-responsive { overflow-x: auto; }
     </style>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="p-2 sm:p-6 lg:p-8">
     <div class="max-w-7xl mx-auto bg-white p-2 sm:p-6 rounded-xl shadow-lg">
@@ -51,19 +50,19 @@
             <img src="logoofort.png" alt="Logo da Oficina Ortopédica da Paraíba" class="logo">
             <h1 class="text-3xl font-bold text-gray-800 header-title">Procedimentos de OPMEs disponíveis na Oficina Ortopédica da Paraíba</h1>
         </div>
-        <div class="mb-4">
+        
+        <div class="mb-4 relative">
+            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <i class="fas fa-search text-gray-400"></i>
+            </div>
             <input
                 type="text"
                 id="search-input"
                 placeholder="Pesquisa geral por procedimento, categoria, CIDs..."
-                class="w-full p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                class="w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm"
             >
         </div>
-<button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-    <i class="fas fa-search mr-2"></i>
-    Consultar Procedimentos
-</button>
-
+        
         <div class="table-responsive">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead>
@@ -77,8 +76,7 @@
                     </tr>
                 </thead>
                 <tbody id="data-table-body" class="bg-white divide-y divide-gray-200">
-                    <!-- Dados inseridos via JS -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
         <div id="pagination-controls" class="pagination mt-6 flex justify-center items-center"></div>
@@ -223,4 +221,4 @@
         document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>
-    </html>
+</html>
